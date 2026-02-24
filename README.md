@@ -1,27 +1,27 @@
 
 # Table of Contents
 
-1.  [Project Explanation](#orgd33180b)
-    1.  [Client](#orgb63afbb)
-    2.  [Server](#orge3a406c)
-2.  [Install and Use with Docker Compose](#orgc6ab417)
-    1.  [Prerequisites](#org580b457)
-    2.  [Steps](#org75e3307)
-    3.  [Query the Server](#org0c897e2)
-    4.  [Extra: Makefile](#org3f05462)
-3.  [Install and Use with SysVinit (Debian)](#org5ff68b2)
-    1.  [Init Script](#org56103e7)
-    2.  [Control the Service](#org20cfbd3)
-    3.  [Logrotate](#org69e9aff)
-4.  [Manual Run and Troubleshooting](#orgdd8127b)
-    1.  [Run Client Manually](#org5f52455)
-    2.  [Run Server Manually](#org577c856)
-    3.  [Common Issues](#orgf7c94ad)
-5.  [Summary](#org7ffc1fb)
+1.  [Project Explanation](#org0c19a12)
+    1.  [Client](#org11df23b)
+    2.  [Server](#orgfc5ddec)
+2.  [Install and Use with Docker](#org7714d67)
+    1.  [Introduction](#org6f54573)
+    2.  [Prerequisites](#orgf1656a0)
+    3.  [Steps](#org3845af9)
+    4.  [Query the Server](#org094d481)
+3.  [Install and Use with SysVinit (Debian)](#org47c6af7)
+    1.  [Init Script](#org1ca1f8a)
+    2.  [Control the Service](#org981ffc8)
+    3.  [Logrotate](#org6c97aab)
+4.  [Manual Run and Troubleshooting](#org45f8ba7)
+    1.  [Run Client Manually](#orgd312bf3)
+    2.  [Run Server Manually](#orgd0d219c)
+    3.  [Common Issues](#org12ad1d7)
+5.  [Summary](#org72c516c)
 
 
 
-<a id="orgd33180b"></a>
+<a id="org0c19a12"></a>
 
 # Project Explanation
 
@@ -30,7 +30,7 @@ stack**. It is designed to fetch, filter, store, and serve stream
 metadata for **live**, **VOD**, and **series** streams.
 
 
-<a id="orgb63afbb"></a>
+<a id="org11df23b"></a>
 
 ## Client
 
@@ -41,7 +41,7 @@ metadata for **live**, **VOD**, and **series** streams.
 -   Refreshes streams daily at a scheduled time.
 
 
-<a id="orge3a406c"></a>
+<a id="orgfc5ddec"></a>
 
 ## Server
 
@@ -53,38 +53,50 @@ metadata for **live**, **VOD**, and **series** streams.
 This setup allows you to maintain a curated set of streams locally and serve them securely to clients.
 
 
-<a id="orgc6ab417"></a>
+<a id="org7714d67"></a>
 
-# Install and Use with Docker Compose
+# Install and Use with Docker
 
 
-<a id="org580b457"></a>
+<a id="org6f54573"></a>
+
+## Introduction
+
+It creates a docker container with client and server on port 8080.
+
+
+<a id="orgf1656a0"></a>
 
 ## Prerequisites
 
 -   Docker
--   Docker Compose
+-   make
 
 
-<a id="org75e3307"></a>
+<a id="org3845af9"></a>
 
 ## Steps
 
-1.  Build and start the stack:
+1.  Build the image:
     
-        docker-compose up --build -d
+        make build
 
-2.  Check logs:
+2.  Run the container:
     
-        docker-compose logs -f xtream-client
-        docker-compose logs -f xtream-server
+        make run
 
-3.  Stop the stack:
+3.  Stop the container:
     
-        docker-compose down
+        make stop
+
+4.  Other make options
+    
+        make image-rm # deletes docker image
+        make start
+        make attach
 
 
-<a id="org0c897e2"></a>
+<a id="org094d481"></a>
 
 ## Query the Server
 
@@ -93,45 +105,12 @@ This setup allows you to maintain a curated set of streams locally and serve the
 This will return JSON with the filtered streams.
 
 
-<a id="org3f05462"></a>
-
-## Extra: Makefile
-
-Usage: 
-
-1.  Build images
-    
-        make build
-2.  Start client + server stack
-    
-        make up
-3.  Stop everything
-    
-        make down
-4.  Follow logs
-    
-        make logs
-5.  Run client manually (one-off refresh)
-    
-        make client
-6.  Run server manually
-    
-        make server
-7.  Deletes SQLite file
-    
-        make delete-db
-
-Note: after running you should run:
-
-    make client
-
-
-<a id="org5ff68b2"></a>
+<a id="org47c6af7"></a>
 
 # Install and Use with SysVinit (Debian)
 
 
-<a id="org56103e7"></a>
+<a id="org1ca1f8a"></a>
 
 ## Init Script
 
@@ -146,7 +125,7 @@ A single init script (/etc/init.d/xtream-app) manages both client and server.
         sudo update-rc.d xtream-app defaults
 
 
-<a id="org20cfbd3"></a>
+<a id="org981ffc8"></a>
 
 ## Control the Service
 
@@ -156,7 +135,7 @@ A single init script (/etc/init.d/xtream-app) manages both client and server.
     sudo service xtream-app status
 
 
-<a id="org69e9aff"></a>
+<a id="org6c97aab"></a>
 
 ## Logrotate
 
@@ -168,12 +147,12 @@ Logs are stored in:
 A logrotate config (/etc/logrotate.d/xtream-app) rotates logs daily, keeps 7 days, compresses old logs, and ensures they don’t grow indefinitely.
 
 
-<a id="orgdd8127b"></a>
+<a id="org45f8ba7"></a>
 
 # Manual Run and Troubleshooting
 
 
-<a id="org5f52455"></a>
+<a id="orgd312bf3"></a>
 
 ## Run Client Manually
 
@@ -182,7 +161,7 @@ A logrotate config (/etc/logrotate.d/xtream-app) rotates logs daily, keeps 7 day
 This will fetch and store streams immediately.
 
 
-<a id="org577c856"></a>
+<a id="orgd0d219c"></a>
 
 ## Run Server Manually
 
@@ -191,7 +170,7 @@ This will fetch and store streams immediately.
 Server will start on `http://localhost:8080`.
 
 
-<a id="orgf7c94ad"></a>
+<a id="org12ad1d7"></a>
 
 ## Common Issues
 
@@ -201,7 +180,7 @@ Server will start on `http://localhost:8080`.
 -   **Logs**: Check `/var/log/xtream-client.log` and `/var/log/xtream-server.log` for runtime errors.
 
 
-<a id="org7ffc1fb"></a>
+<a id="org72c516c"></a>
 
 # Summary
 

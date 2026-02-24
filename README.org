@@ -22,70 +22,42 @@ metadata for *live*, *VOD*, and *series* streams.
 
 This setup allows you to maintain a curated set of streams locally and serve them securely to clients.
 
-* Install and Use with Docker Compose
+* Install and Use with Docker
+** Introduction
+It creates a docker container with client and server on port 8080.
+
 ** Prerequisites
 - Docker
-- Docker Compose
+- make
 
 ** Steps
-1. Build and start the stack:
+1. Build the image:
    #+BEGIN_SRC bash
-   docker-compose up --build -d
+     make build
    #+END_SRC
 
-2. Check logs:
+2. Run the container:
    #+BEGIN_SRC bash
-   docker-compose logs -f xtream-client
-   docker-compose logs -f xtream-server
+     make run
    #+END_SRC
 
-3. Stop the stack:
+3. Stop the container:
    #+BEGIN_SRC bash
-   docker-compose down
+     make stop
    #+END_SRC
+
+4. Other make options
+   #+begin_src bash
+   make image-rm # deletes docker image
+   make start
+   make attach
+   #+end_src
 
 ** Query the Server
 #+BEGIN_SRC bash
 curl -u server_user:server_pass "http://localhost:8080/streams?type=live"
 #+END_SRC
-
 This will return JSON with the filtered streams.
-
-** Extra: Makefile
-Usage: 
-1. Build images
-   #+begin_src bash
-   make build
-   #+end_src
-2. Start client + server stack
-   #+begin_src bash
-   make up
-   #+end_src
-3. Stop everything
-   #+begin_src bash
-   make down
-   #+end_src
-4. Follow logs
-   #+begin_src bash
-   make logs
-   #+end_src
-5. Run client manually (one-off refresh)
-   #+begin_src bash
-   make client
-   #+end_src
-6. Run server manually
-   #+begin_src bash
-   make server
-   #+end_src
-7. Deletes SQLite file
-   #+begin_src bash
-   make delete-db
-   #+end_src
-
-Note: after running you should run:
-#+begin_src bash
-make client
-#+end_src
 
 * Install and Use with SysVinit (Debian)
 ** Init Script

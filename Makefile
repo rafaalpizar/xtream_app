@@ -13,10 +13,10 @@ image-rm:
 	$(DOCKER) image rm $(IMAGE)
 
 run-rm:
-	$(DOCKER) run --rm -it $(IMAGE) bash
+	$(DOCKER) run -p 8080:8080 --rm -it $(IMAGE) bash
 
 run:
-	$(DOCKER) run --name $(CONTAINER) $(IMAGE)
+	$(DOCKER) run -d -p 8080:8080 --name $(CONTAINER) $(IMAGE)
 
 start:
 	$(DOCKER) start $(CONTAINER)
