@@ -1,0 +1,85 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          xtream-app
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Xtream Client/Server Service
+# Description:       Manage Xtream client and server processes
+### END INIT INFO
+
+APP_DIR=/opt/xtream_app
+CLIENT_EXEC=client.py
+SERVER_EXEC=server.py
+APP_USER=www-data
+
+CLIENT_PID=/var/run/xtream-client.pid
+SERVER_PID=/var/run/xtream-server.pid
+
+CLIENT_LOG=/var/log/xtream-client.log
+SERVER_LOG=/var/log/xtream-server.log
+
+DAEMON=/usr/bin/python3
+
+. /lib/lsb/init-functions
+
+start_client() {
+    echo "Starting Xtream client..."
+    start-stop-daemon --start --quiet --chuid $APP_USER \
+      --background --make-pidfile --pidfile $CLIENT_PID \
+      --exec $DAEMON -- $APP_DIR/$CLIENT_EXEC >> $CLIENT_LOG 2>&1
+}
+
+stop_client() {
+    echo "Stopping Xtream client..."
+    start-stop-daemon --stop --quiet --pidfile $CLIENT_PID
+    rm -f $CLIENT_PID
+}
+
+start_server() {
+    echo "Starting Xtream server..."
+    start-stop-daemon --start --quiet --chuid $APP_USER \
+      --background --make-pidfile --pidfile $SERVER_PID \
+      --exec $DAEMON -- $APP_DIR/$SERVER_EXEC >> $SERVER_LOG 2>&1
+}
+
+stop_server() {
+    echo "Stopping Xtream server..."
+    start-stop-daemon --stop --quiet --pidfile $SERVER_PID
+    rm -f $SERVER_PID
+}
+
+case "$1" in
+  start)
+    start_client
+    start_server
+    ;;
+  stop)
+    stop_client
+    stop_server
+    ;;
+  restart)
+    $0 stop
+    sleep 2
+    $0 start
+    ;;
+  status)
+    if [ -f $CLIENT_PID ] && ps -p $(cat $CLIENT_PID) > /dev/null; then
+      echo "Xtream client running (PID $(cat $CLIENT_PID))"
+    else
+      echo "Xtream client not running"
+    fi
+    if [ -f $SERVER_PID ] && ps -p $(cat $SERVER_PID) > /dev/null; then
+      echo "Xtream server running (PID $(cat $SERVER_PID))"
+    else
+      echo "Xtream server not running"
+    fi
+    ;;
+  *)
+    echo "Usage: /etc/init.d/xtream-app {start|stop|restart|status}"
+    exit 1
+    ;;
+esac
+
+exit 0

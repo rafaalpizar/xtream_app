@@ -1,0 +1,19 @@
+# Create /etc/logrotate.d/xtream-app:
+/var/log/xtream-client.log /var/log/xtream-server.log {
+    daily
+    rotate 7
+    compress
+    missingok
+    notifempty
+    create 640 www-data adm
+    sharedscripts
+    postrotate
+        # Restart services to reopen log files if needed
+        if [ -f /var/run/xtream-client.pid ]; then
+            kill -HUP $(cat /var/run/xtream-client.pid) 2>/dev/null || true
+        fi
+        if [ -f /var/run/xtream-server.pid ]; then
+            kill -HUP $(cat /var/run/xtream-server.pid) 2>/dev/null || true
+        fi
+    endscript
+}

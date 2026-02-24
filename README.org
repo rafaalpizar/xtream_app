@@ -1,0 +1,144 @@
+#+TITLE: Xtream Client/Server Application
+#+AUTHOR: Rafa
+#+OPTIONS: toc:t num:t
+
+* Project Explanation
+This project provides a *Python-based Xtream protocol client/server
+stack*. It is designed to fetch, filter, store, and serve stream
+metadata for *live*, *VOD*, and *series* streams.
+
+** Client
+- Authenticates against an external Xtream API using username/password.
+- Fetches metadata for all streams (live, VOD, series).
+- Filters streams based on a *whitelist* and *blacklist* of categories or names.
+- Stores filtered streams in a *SQLite database*.
+- Refreshes streams daily at a scheduled time.
+
+** Server
+- Exposes a REST API (/streams) to query stored streams.
+- Supports filtering by stream type (live, vod, series).
+- Requires its own username/password authentication.
+- Runs on port *8080* by default.
+
+This setup allows you to maintain a curated set of streams locally and serve them securely to clients.
+
+* Install and Use with Docker Compose
+** Prerequisites
+- Docker
+- Docker Compose
+
+** Steps
+1. Build and start the stack:
+   #+BEGIN_SRC bash
+   docker-compose up --build -d
+   #+END_SRC
+
+2. Check logs:
+   #+BEGIN_SRC bash
+   docker-compose logs -f xtream-client
+   docker-compose logs -f xtream-server
+   #+END_SRC
+
+3. Stop the stack:
+   #+BEGIN_SRC bash
+   docker-compose down
+   #+END_SRC
+
+** Query the Server
+#+BEGIN_SRC bash
+curl -u server_user:server_pass "http://localhost:8080/streams?type=live"
+#+END_SRC
+
+This will return JSON with the filtered streams.
+
+** Extra: Makefile
+Usage: 
+1. Build images
+   #+begin_src bash
+   make build
+   #+end_src
+2. Start client + server stack
+   #+begin_src bash
+   make up
+   #+end_src
+3. Stop everything
+   #+begin_src bash
+   make down
+   #+end_src
+4. Follow logs
+   #+begin_src bash
+   make logs
+   #+end_src
+5. Run client manually (one-off refresh)
+   #+begin_src bash
+   make client
+   #+end_src
+6. Run server manually
+   #+begin_src bash
+   make server
+   #+end_src
+7. Deletes SQLite file
+   #+begin_src bash
+   make delete-db
+   #+end_src
+
+Note: after running you should run:
+#+begin_src bash
+make client
+#+end_src
+
+* Install and Use with SysVinit (Debian)
+** Init Script
+A single init script (/etc/init.d/xtream-app) manages both client and server.
+
+1. Copy the script to =/etc/init.d/xtream-app=.
+2. Make it executable:
+   #+BEGIN_SRC bash
+   sudo chmod +x /etc/init.d/xtream-app
+   #+END_SRC
+3. Register with SysVinit:
+   #+BEGIN_SRC bash
+   sudo update-rc.d xtream-app defaults
+   #+END_SRC
+
+** Control the Service
+#+BEGIN_SRC bash
+sudo service xtream-app start
+sudo service xtream-app stop
+sudo service xtream-app restart
+sudo service xtream-app status
+#+END_SRC
+
+** Logrotate
+Logs are stored in:
+- =/var/log/xtream-client.log=
+- =/var/log/xtream-server.log=
+
+A logrotate config (/etc/logrotate.d/xtream-app) rotates logs daily, keeps 7 days, compresses old logs, and ensures they don’t grow indefinitely.
+
+* Manual Run and Troubleshooting
+** Run Client Manually
+#+BEGIN_SRC bash
+python client.py
+#+END_SRC
+This will fetch and store streams immediately.
+
+** Run Server Manually
+#+BEGIN_SRC bash
+python server.py
+#+END_SRC
+Server will start on =http://localhost:8080=.
+
+** Common Issues
+- *Authentication errors*: Check =config.py= credentials for both client and server.
+- *Database not found*: Ensure =streams.db= exists or run =client.py= once to initialize.
+- *Port conflicts*: Change the port in =server.py= if 8080 is already in use.
+- *Logs*: Check =/var/log/xtream-client.log= and =/var/log/xtream-server.log= for runtime errors.
+
+* Summary
+You can run this project in three ways:
+- *Docker Compose*: Recommended for easy deployment and containerized environments.
+- *SysVinit*: For traditional service management on Debian-based systems.
+- *Manual Run*: For development, debugging, and troubleshooting.
+
+This flexibility ensures you can deploy the Xtream client/server stack in the environment that best suits your needs.
